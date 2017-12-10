@@ -1,6 +1,9 @@
+int currentMapID;
+ArrayList<Bouton> boutons = new ArrayList<Bouton>();
+
 import java.util.Iterator;
 
-String[] elements = {"fire", "water", "earth", "air"};
+String[] Elements = {"feu", "eau", "air", "terre"};
 ArrayList<Monster> monsters = new ArrayList<Monster>();
 int heroX = 300;
 int heroY = 200;
@@ -9,41 +12,168 @@ int time;
 int spawnNbr = 1;
 boolean gameover = false;
 PFont f;
-String currentMapElement = "water";
 
 void setup(){
+  
   size(1200,800);
   f = createFont("Arial",16,true);
   smooth();
-  background(255,255,255);
   time = millis();
+
+  currentMapID = 0;
+  
+  Bouton boutonEau = new BoutonEau();
+  boutons.add(boutonEau);
+  
+  Bouton boutonFeu = new BoutonFeu();
+  boutons.add(boutonFeu);
+  
+  Bouton boutonAir = new BoutonAir();
+  boutons.add(boutonAir);
+  
+  Bouton boutonTerre = new BoutonTerre();
+  boutons.add(boutonTerre);
 }
 
-void draw(){
-  background(255,255,255);
+void draw()
+{
+  background(255);
+  Map newMap = new Map();
+  newMap.PickMap(Elements[currentMapID]);
+  
+  for (Bouton bouton : boutons){
+    bouton.DrawButton();
+  }
+    Bouton mouseBouton = getMouseBouton();
+  if (mouseBouton != null){
+      mouseBouton.Over();
+  }
   if (gameover){
     drawGameOver();
   }
   else {
-    fill(0,0,255);
-    rect(15, 15, 600, 400);
     createMonsters();
     drawHero();
     drawMonsters();
   }
 }
 
+public Bouton getMouseBouton()
+{
+  for (Bouton bouton : boutons){
+    if (bouton.x < mouseX && mouseX < bouton.x + width/6  && bouton.y < mouseY && mouseY < bouton.y + height/8) return bouton;
+  }
+  return null;
+}
+
+void mousePressed(){
+  Bouton mouseBouton = getMouseBouton();
+  if (mouseBouton != null){
+      mouseBouton.Click();
+  }
+}
+class Map
+{
+PImage MondeFeu; 
+PImage MondeEau;
+PImage MondeAir;
+PImage MondeTerre;
+
+Map()
+{
+
+MondeFeu = loadImage("feu.jpg");
+MondeEau = loadImage("eau.jpg");
+MondeAir = loadImage("air.jpg");
+MondeTerre = loadImage("terre.jpg");
+
+}
+
+  
+public void PickMap(String typeMap)
+{
+  if (typeMap == "feu")
+  {
+    printMap(MondeFeu);  
+  }
+  
+    if (typeMap == "eau")
+  {
+    printMap(MondeEau); 
+  }
+  
+    if (typeMap == "air")
+  {
+    printMap(MondeAir); 
+  }
+  
+    if (typeMap == "terre")
+  {
+    printMap(MondeTerre); 
+  }
+}
+public void printMap(PImage Image)
+{
+  image(Image, 0, 0, width/2, height/2); 
+}
+}
+
+abstract class Bouton
+{
+
+int x;
+int y;
+
+
+PImage Image;
+PImage Over;
+
+
+
+Bouton(int x,int y)
+{
+  setX(x);
+  setY(y);
+}
+
+public void setX(int X)
+{
+  this.x = X;
+}
+
+public void setY(int Y)
+{
+  this.y = Y;
+}
+
+public void DrawButton()
+{
+  
+  image(this.Image, this.x, this.y, width/3, height/15); 
+  
+}
+
+public void Over()
+{
+  image(this.Over, this.x, this.y, width/3, height/15);  
+}
+
+public void Click(){
+
+}
+}
+
 void drawMonsters(){
   for (Iterator<Monster> iterator = monsters.iterator(); iterator.hasNext();){
       Monster monster = iterator.next();
       switch (monster._element) {
-        case "fire":
+        case "feu":
           fill(255 - (100 - monster._hp),0,0);
           break;
-        case "water":
+        case "eau":
           fill(0,0,255);
           break;
-        case "earth":
+        case "terre":
           fill(0,255,0);
           break;
         case "air":
@@ -134,17 +264,17 @@ class Monster {
      velocity = new PVector(0,0);
      topspeed = 0.1;
      switch (element){
-     case "fire":
-       weakElement = "water";
+     case "feu":
+       weakElement = "eau";
        break;
-     case "water":
-       weakElement = "earth";
+     case "eau":
+       weakElement = "terre";
        break;
-     case "earth":
+     case "terre":
        weakElement = "air";
        break;
      case "air":
-       weakElement = "fire";
+       weakElement = "feu";
        break;
      }
   }
